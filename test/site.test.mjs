@@ -4,7 +4,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { LANGS, storyHtml } from "../scripts/build.mjs";
-import { SNIFFERS, BLANKS, CHECKS } from "../src/sniffers.mjs";
+import { SNIFFERS, BLANKS, CHECKS, PROTO } from "../src/sniffers.mjs";
 
 const read = f => readFile(new URL("../" + f, import.meta.url), "utf8");
 const page = slug => read(`public/${slug ? slug + "/" : ""}index.html`);
@@ -29,7 +29,7 @@ test("every sniffer, blank and check has its place before any reading", async ()
     const h = await page(slug);
     assert.equal((h.match(/<div class="pr wait" data-s="/g) || []).length, SNIFFERS.length, lang);
     assert.equal((h.match(/<span class="bl wait" data-b="/g) || []).length, Object.keys(BLANKS).length, lang);
-    assert.equal((h.match(/<li class="ckr" data-c="/g) || []).length, CHECKS.length, lang);
+    assert.equal((h.match(/<li class="ckr" data-c="/g) || []).length, CHECKS.length + PROTO.length, lang);   // the checks, then the protocols
   }
   assert.equal(new Set(SNIFFERS.map(s => s.id)).size, SNIFFERS.length, "sniffer ids are unique");
   for (const ids of Object.values(BLANKS)) for (const id of ids) assert.ok(SNIFFERS.some(s => s.id === id), "blank source " + id);

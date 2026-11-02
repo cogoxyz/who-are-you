@@ -1,7 +1,7 @@
 // What the readings are taken to mean: system and browser, graphics card, keyboard, network, nationality, checks.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { langCC, nationality, device, browser, gpuName, gpuOS, kbdLayout, isDataCenter, fontHints, checks, offTxt, splitOf, netOf } from "../src/infer.mjs";
+import { langCC, nationality, device, browser, gpuName, gpuOS, kbdLayout, isDataCenter, fontHints, checks, protocols, offTxt, splitOf, netOf } from "../src/infer.mjs";
 
 const WIN = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36";
 const MAC_SAFARI = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Safari/605.1.15";
@@ -137,4 +137,28 @@ test("DNS leak: the resolver's country against the address's", () => {
   assert.equal(checks({ ipcc: "JP", dnsCC: "JP" }).dns[0], "ok");
   assert.equal(checks({ ipcc: "JP", dnsCC: null }).dns[0], "info");
   assert.equal(checks({ ipcc: "JP" }).dns, null);
+});
+
+test("protocols", () => {
+  const chrome = { name: "Chrome", v: "141" }, lv = x => Object.fromEntries(Object.entries(protocols(x)).map(([k, v]) => [k, v && v[1]]));
+  const base = { http: ["HTTP/2", "http/2"], rtc: ["1.2.3.4"], br: chrome, sni: "encrypted", kex: "X25519MLKEM768", warp: "off", gateway: "off" };
+  assert.deepEqual(lv(base), { h3: "c_h3_wait", ech: "c_ech_ok", pq: "c_pq_ok", warp: "c_warp_off" });
+  // HTTP/3 once is enough; never, with no UDP at all, is a blocked or uncarried UDP; without WebRTC, no telling
+  assert.equal(protocols({ ...base, http: ["HTTP/2", "http/3"] }).h3[0], "ok");
+  assert.equal(protocols({ ...base, http: ["HTTP/3"] }).h3[0], "ok");
+  assert.deepEqual(protocols({ ...base, rtc: [] }).h3, ["warn", "c_h3_udp", {}]);
+  assert.equal(protocols({ ...base, rtc: false }).h3[1], "c_h3_unk");
+  assert.equal(protocols({ ...base, rtc: undefined }).h3, null);
+  // ECH off: the likeliest reason by browser
+  assert.equal(protocols({ ...base, sni: "plaintext" }).ech[1], "c_ech_dns");
+  assert.equal(protocols({ ...base, sni: "plaintext", br: { name: "Firefox", v: "140" } }).ech[1], "c_ech_ff");
+  assert.equal(protocols({ ...base, sni: "plaintext", br: { name: "Safari", v: "18" } }).ech[1], "c_ech_safari");
+  // a classical key exchange from a browser that offers post-quantum by default: something in between
+  assert.deepEqual(protocols({ ...base, kex: "X25519" }).pq, ["warn", "c_pq_mitm", { kex: "X25519", b: "Chrome 141" }]);
+  assert.equal(protocols({ ...base, kex: "X25519", br: { name: "Chrome", v: "110" } }).pq[1], "c_pq_old");
+  assert.equal(protocols({ ...base, kex: "X25519", br: { name: "Safari", v: "18" } }).pq[1], "c_pq_old");
+  assert.equal(protocols({ ...base, kex: "X25519", br: { name: "Firefox", v: "135" } }).pq[1], "c_pq_mitm");
+  assert.deepEqual(protocols({ ...base, warp: "plus" }).warp, ["info", "c_warp_on", { w: "plus" }]);
+  assert.equal(protocols({ ...base, gateway: "on" }).warp[1], "c_warp_gw");
+  assert.deepEqual(protocols({ http: [] }), { h3: null, ech: null, pq: null, warp: null });
 });

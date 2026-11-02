@@ -12,7 +12,7 @@ import { mkdir, readFile, readdir, writeFile, rm } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { build as bundle, transform } from "esbuild";
-import { GROUPS, COLUMNS, SNIFFERS, BLANKS, CHECKS } from "../src/sniffers.mjs";
+import { GROUPS, COLUMNS, SNIFFERS, BLANKS, CHECKS, PROTO } from "../src/sniffers.mjs";
 import { PAGES, TEXT } from "../src/pages.mjs";
 
 const SITE = (process.env.SITE_URL || "https://who.1ms.dog").replace(/\/+$/, "");
@@ -117,11 +117,13 @@ export async function build({ check = false } = {}) {
       ].join("\n");
 
       // the checks and every sniffer have their rows from the start; readings fill them in place
-      const checks = `<ul class="ck" id="checks">` + CHECKS.map(c => `<li class="ckr" data-c="${c}"><i class="st"></i><span class="ck-l">${esc(T("c_" + c))}` +
+      // (the connection's protocols follow under their own heading, in the same rows)
+      const ckRows = (id, list) => `<ul class="ck" id="${id}">` + list.map(c => `<li class="ckr" data-c="${c}"><i class="st"></i><span class="ck-l">${esc(T("c_" + c))}` +
         `<span class="ck-acts"><button class="ck-fix" type="button" aria-expanded="false" hidden>${esc(T("fix"))}</button>` +
         (GO[c] ? `<a class="ck-go" target="_blank" rel="noopener" hidden>${esc(T("go_" + GO[c]))}${EXT}</a>` : "") +
         `</span></span><span class="ck-v"><i class="skl"></i></span>` +
         `<ul class="ck-tip" hidden>${T("tip_" + c).split("\n").map(l => `<li>${esc(l)}</li>`).join("")}</ul></li>`).join("") + "</ul>";
+      const checks = ckRows("checks", CHECKS) + `<div class="proto" id="protoBox"><div class="sec-h"><span>${esc(T("h_proto"))}</span></div>${ckRows("proto", PROTO)}</div>`;
       const G = Object.fromEntries(GROUPS);
       const group = g => `<div class="pg" data-g="${g}"><h3>${esc(T("g_" + g))}<span class="pg-n">${G[g].length}</span>` +
         (g === "exit" ? `<a class="pg-a" id="egLink" target="_blank" rel="noopener" hidden>${esc(T("ex_more"))}${EXT}</a>` : "") + "</h3>" +

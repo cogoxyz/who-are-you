@@ -104,3 +104,5 @@ export const BLANKS = {
 
 // the disguise checks, one row each
 export const CHECKS = ["tz", "lang", "dns", "split", "webrtc", "dc", "ua", "fp", "bot"];
+// the connection's protocols: shown under the checks, judged the same way, not counted among them
+export const PROTO = ["h3", "ech", "pq", "warp"];

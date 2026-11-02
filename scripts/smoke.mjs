@@ -12,7 +12,7 @@ import { readFile, access } from "node:fs/promises";
 import { extname } from "node:path";
 import puppeteer from "puppeteer-core";
 import { LANGS } from "./build.mjs";
-import { SNIFFERS, BLANKS, CHECKS } from "../src/sniffers.mjs";
+import { SNIFFERS, BLANKS, CHECKS, PROTO } from "../src/sniffers.mjs";
 import { decode, SLUG, parsePath } from "../src/share.mjs";
 import { PAGES } from "../src/pages.mjs";
 
@@ -76,7 +76,7 @@ for (const [lang, slug] of LANGS) {
   if (r.waiting) fail(lang, `${r.waiting} blanks still waiting`);
   if (/\{\w+\}|undefined|null|NaN/.test(r.story)) fail(lang, "portrait has a leftover: " + r.story.match(/.{0,20}(\{\w+\}|undefined|null|NaN).{0,20}/)[0]);
   for (const [id, cls] of r.checks) if (!/st-/.test(cls)) fail(lang, `check ${id} not judged`);
-  if (r.checks.length !== CHECKS.length) fail(lang, `${r.checks.length} checks, expected ${CHECKS.length}`);
+  if (r.checks.length !== CHECKS.length + PROTO.length) fail(lang, `${r.checks.length} checks, expected ${CHECKS.length + PROTO.length}`);
   if (!/^\d+$/.test(r.num)) fail(lang, `count "${r.num}"`);
   if (!r.fp.trim() || !r.ret.trim()) fail(lang, "ID card not filled");
 

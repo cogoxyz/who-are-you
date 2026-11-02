@@ -199,3 +199,38 @@ export function checks(x) {
 
 // "+08:00" from a UTC offset in minutes
 export const offTxt = m => (m < 0 ? "−" : "+") + String(Math.floor(Math.abs(m) / 60)).padStart(2, "0") + ":" + String(Math.abs(m) % 60).padStart(2, "0");
+
+// The connection's protocols, from this site's /cdn-cgi/trace and the request itself. Each is [level, key, vars] like
+// a check, or null while its inputs are still coming in. They say how the connection is made, not who you are, so
+// they don't count among the things that give you away.
+//   http   the protocols seen so far ("HTTP/2", "http/3", …: the page's request, then repeated traces)
+//   rtc    the public addresses STUN servers saw over UDP ([] none, false WebRTC off, undefined not yet)
+//   br     { name, v } the browser; sni, kex, warp, gateway: the trace's fields
+export function protocols(x) {
+  const out = {}, v = +(x.br && x.br.v) || 0, name = (x.br && x.br.name) || "";
+  // HTTP/3 needs UDP 443. Seen once, it works; not seen, the browser may simply not have switched yet (it learns
+  // that a site speaks HTTP/3 from a first answer over TCP), unless UDP gets out nowhere at all: then it's blocked
+  // or the proxy doesn't carry it. Without WebRTC there's no telling.
+  if (!x.http || !x.http.length || x.rtc === undefined) out.h3 = null;
+  else if (x.http.some(p => /^(http\/3|h3)$/i.test(p))) out.h3 = ["ok", "c_h3_ok", {}];
+  else if (x.rtc === false) out.h3 = ["info", "c_h3_unk", {}];
+  else out.h3 = x.rtc.length ? ["info", "c_h3_wait", {}] : ["warn", "c_h3_udp", {}];
+  // ECH: this site publishes its keys in DNS (an HTTPS record), so a browser that can use them hides which site it
+  // talks to. When it doesn't, the likeliest reason depends on the browser.
+  if (!x.sni) out.ech = null;
+  else if (x.sni === "encrypted") out.ech = ["ok", "c_ech_ok", {}];
+  else out.ech = ["warn", name === "Safari" ? "c_ech_safari" : name === "Firefox" ? "c_ech_ff" : "c_ech_dns", {}];
+  // post-quantum key exchange: browsers that offer it by default (Chromium 124, Firefox 132, Safari 26) and still
+  // end up with a classical one point to something in between that makes its own TLS connections
+  if (!x.kex) out.pq = null;
+  else if (/MLKEM|Kyber/i.test(x.kex)) out.pq = ["ok", "c_pq_ok", { kex: x.kex }];
+  else {
+    const chromium = /^(Chrome|Edge|Opera|Brave|Vivaldi|Yandex)$/.test(name), want = chromium ? 124 : name === "Firefox" ? 132 : name === "Safari" ? 26 : 0;
+    out.pq = want && v >= want ? ["warn", "c_pq_mitm", { kex: x.kex, b: name + " " + v }] : ["info", "c_pq_old", { kex: x.kex }];
+  }
+  // WARP and Gateway: Cloudflare's own tunnel and filter, neither good nor bad
+  if (!x.warp) out.warp = null;
+  else if (x.warp !== "off") out.warp = ["info", "c_warp_on", { w: x.warp }];
+  else out.warp = ["info", x.gateway === "on" ? "c_warp_gw" : "c_warp_off", {}];
+  return out;
+}

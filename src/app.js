@@ -2,9 +2,9 @@
 // readings against each other the way a site would to spot a disguise. The second card lists every sniffer and what it
 // read; each row is in the HTML from the start and is filled the moment its sniffer answers. The paragraph is filled
 // once, when every sniffer it needs is in, so its text doesn't reflow piece by piece. Strings: window.L1MS.
-import { GROUPS, SNIFFERS, BLANKS, CHECKS } from "./sniffers.mjs";
+import { GROUPS, SNIFFERS, BLANKS, CHECKS, PROTO } from "./sniffers.mjs";
 import { encode, decode, linkPath, parsePath } from "./share.mjs";
-import { nationality, device, browser, gpuName, gpuOS, kbdLayout, isDataCenter, fontHints, checks, offTxt, splitOf } from "./infer.mjs";
+import { nationality, device, browser, gpuName, gpuOS, kbdLayout, isDataCenter, fontHints, checks, protocols, offTxt, splitOf } from "./infer.mjs";
 
 (function () {
   "use strict";
@@ -274,6 +274,7 @@ import { nationality, device, browser, gpuName, gpuOS, kbdLayout, isDataCenter, 
     R.osTxt = [dv.os, dv.osv].filter(Boolean).join(" ");
     txt("os", R.osTxt || navigator.platform || "–");
     const b = browser(ua, hi.fullVersionList || hi.brands || []);
+    R.br = b;
     R.browser = [b.name, b.v].filter(Boolean).join(" ");
     txt("browser", R.browser || "–");
     if (hi.architecture) txt("arch", t("arch_v", { a: hi.architecture, b: hi.bitness || "?" }) + (dv.model ? " · " + dv.model : ""));
@@ -511,9 +512,24 @@ import { nationality, device, browser, gpuName, gpuOS, kbdLayout, isDataCenter, 
   async function trace() {
     const s = await getT("/cdn-cgi/trace").catch(() => "");
     const v = Object.fromEntries(s.split("\n").map(l => l.split("=")).filter(p => p.length === 2));
+    R.tr = v;
     if (!v.kex && !v.warp) { na("kex"); na("warp"); return; }
     if (v.kex) txt("kex", v.kex + (/MLKEM|Kyber/i.test(v.kex) ? " · " + t("kex_pq") : "") + " · ECH " + t(v.sni === "encrypted" ? "v_on" : "v_off")); else na("kex");
     txt("warp", "WARP " + (v.warp || "–") + " · Gateway " + (v.gateway || "–"));
+  }
+
+  // Whether this browser reaches the site over HTTP/3: the page's own request often comes over TCP (the browser
+  // learns from that first answer that the site speaks HTTP/3), so the trace is asked again a few times, a moment
+  // apart, until one comes over QUIC
+  async function http3() {
+    R.http = [];
+    for (let i = 0; i < 4; i++) {
+      await new Promise(r => setTimeout(r, 700));
+      const s = await getT("/cdn-cgi/trace").catch(() => "");
+      const m = s.match(/^http=(.+)$/m);
+      if (m) R.http.push(m[1].trim());
+      if (m && /^http\/3$/i.test(m[1].trim())) break;
+    }
   }
 
   async function webgpu() {
@@ -705,11 +721,11 @@ import { nationality, device, browser, gpuName, gpuOS, kbdLayout, isDataCenter, 
   // res: check id → [level, key, vars]; ipc: the address's country
   function paintChecks(res, ipc, final) {
     let bad = 0, warn = 0;
-    for (const id of CHECKS) {
+    for (const id of [...CHECKS, ...PROTO]) {
       const r = CK[id], v = res[id];
       if (!v) continue;
       const [lv] = v;
-      if (lv === "bad") bad++; if (lv === "warn") warn++;
+      if (CHECKS.includes(id)) { if (lv === "bad") bad++; if (lv === "warn") warn++; }
       r.className = "ckr st-" + lv;
       const sg = $(`#segs [data-c="${id}"]`); if (sg) sg.className = "st-" + lv;
       // the whole text on hover only when two lines cut it short; otherwise it would just repeat the row
@@ -730,6 +746,8 @@ import { nationality, device, browser, gpuName, gpuOS, kbdLayout, isDataCenter, 
       }
     }
     if (!final) return;
+    // a portrait shared before the protocols were judged has none: their rows step aside
+    $("#protoBox").hidden = !PROTO.some(id => res[id]);
     const n = bad + warn;
     $("#vHead").textContent = n ? t("v_found", { n }) : t("v_clean");
     $("#vText").textContent = t(n ? "v_found_d" : "v_clean_d");
@@ -751,6 +769,11 @@ import { nationality, device, browser, gpuName, gpuOS, kbdLayout, isDataCenter, 
       uaOS: R.dev && R.dev.os, real: !!R.dev, hintOS: R.hi && R.hi.platform, gpuOS: gpuOS(R.gpuRaw), rand: R.rand, webdriver: R.webdriver,
     });
     if (res.dc === null && R.srv && !c.asn) res.dc = ["info", "c_na", {}];
+    const tr = R.tr || {};
+    Object.assign(res, protocols({ http: R.http && R.h3done ? [c.httpProtocol, ...R.http].filter(Boolean) : null, rtc: R.rtc, br: R.br,
+      sni: tr.sni, kex: tr.kex, warp: tr.warp, gateway: tr.gateway }));
+    // at the end, a protocol nothing could be read for (no trace: blocked, or not behind Cloudflare) says so
+    if (final) for (const id of PROTO) if (!res[id]) res[id] = ["info", "c_na", {}];
     R.ck = res;
     paintChecks(res, c.country, final);
   }
@@ -781,7 +804,7 @@ import { nationality, device, browser, gpuName, gpuOS, kbdLayout, isDataCenter, 
       const k = n.dataset && n.dataset.b;
       return [(k === "city" || k === "isp") && !show ? t("masked") : n.textContent, k !== "age"];
     }));
-    const res = R.ck || {}, n = Object.values(res).filter(x => x && (x[0] === "bad" || x[0] === "warn")).length;
+    const res = R.ck || {}, n = CHECKS.filter(id => res[id] && (res[id][0] === "bad" || res[id][0] === "warn")).length;
     c.textBaseline = "alphabetic"; c.textAlign = "left";
     let y = kit.top + 20;
     c.font = `800 52px ${F}`; c.fillStyle = FG; if (paint) c.fillText(t("card_me"), P, y); y += 40;
@@ -806,7 +829,7 @@ import { nationality, device, browser, gpuName, gpuOS, kbdLayout, isDataCenter, 
     y += 40;
     if (paint) { c.fillStyle = LINE; c.fillRect(P, y, W - 2 * P, 2); }
     y += 70;
-    c.font = `800 72px ${F}`; c.fillStyle = n ? (Object.values(res).some(x => x && x[0] === "bad") ? LV.bad : LV.warn) : LV.ok;
+    c.font = `800 72px ${F}`; c.fillStyle = n ? (CHECKS.some(id => res[id] && res[id][0] === "bad") ? LV.bad : LV.warn) : LV.ok;
     if (paint) c.fillText(String(n), P, y);
     const nw = c.measureText(String(n)).width;
     c.font = `700 30px ${F}`; c.fillStyle = FG; if (paint) c.fillText(n ? t("v_found", { n }) : t("v_clean"), P + nw + 24, y - 14);
@@ -873,6 +896,7 @@ import { nationality, device, browser, gpuName, gpuOS, kbdLayout, isDataCenter, 
     const glInfo = gpu();
     fonts();
     const rtc = webrtc().then(() => g === gen && judge(false));
+    const h3 = http3().then(() => { R.h3done = true; });
     // the page's own request, and the probes that ask other sites who you are
     const srv = server(), probes = [guard("stack", stack), guard(EXITS.map(([id]) => id), exits), guard("dns", () => dnsResolver().catch(e => { R.dnsCC = null; throw e; }))];
     // Embedded, a run with no answer from this site's server, or none from any other site (an ad blocker drops the
@@ -891,7 +915,7 @@ import { nationality, device, browser, gpuName, gpuOS, kbdLayout, isDataCenter, 
     ]);
     if (g !== gen) return;
     paint(portrait(), false); judge(false);
-    await rtc;
+    await rtc; await h3;
     if (g !== gen) return;
     for (const id of Object.keys(PR)) if (!done.has(id)) na(id);   // anything a sniffer couldn't reach
     judge(true);
@@ -904,9 +928,9 @@ import { nationality, device, browser, gpuName, gpuOS, kbdLayout, isDataCenter, 
   // findings are cut to their network, as in a shared link.
   function embedResult() {
     const c = (R.srv && R.srv.cf) || {}, ck = R.ck || {}, P = sharedPortrait(false), lv = id => ck[id] && ck[id][0];
-    const found = Object.values(ck).filter(x => x && (x[0] === "bad" || x[0] === "warn")).length;
+    const found = CHECKS.filter(id => ck[id] && (ck[id][0] === "bad" || ck[id][0] === "warn")).length;
     const RANK = { bad: 0, warn: 1, ok: 2 };
-    const findings = CHECKS.filter(id => P.ck[id] && P.ck[id][0] in RANK).sort((a, b) => RANK[P.ck[a][0]] - RANK[P.ck[b][0]]).slice(0, 4)
+    const findings = [...CHECKS, ...PROTO].filter(id => P.ck[id] && P.ck[id][0] in RANK).sort((a, b) => RANK[P.ck[a][0]] - RANK[P.ck[b][0]]).slice(0, 4)
       .map(id => ({ level: P.ck[id][0], text: t("c_" + id) + " · " + ckText(id, P.ck[id], c.country) }));
     const stats = [{ label: t("h_checks"), value: found + " / " + CHECKS.length }];
     if (c.country) stats.push({ label: t("s_geo"), value: country(c.country) });
@@ -919,6 +943,11 @@ import { nationality, device, browser, gpuName, gpuOS, kbdLayout, isDataCenter, 
     if (R.dnsCC) facts.dnsCountry = R.dnsCC;
     if (ck.dc && lv("dc") !== "info") facts.dc = lv("dc") !== "ok";
     if (ck.fp) facts.fpSame = ck.fp[1] === "c_fp_same";
+    // HTTP/3 true once seen, false when UDP gets out nowhere, left out when there's no telling
+    if (ck.h3 && (lv("h3") === "ok" || lv("h3") === "warn")) facts.h3 = lv("h3") === "ok";
+    if (ck.ech) facts.ech = lv("ech") === "ok";
+    if (ck.pq) facts.pq = lv("pq") === "ok";
+    if (ck.warp) facts.warp = ck.warp[1] === "c_warp_on";
     return { type: "result", lang: LANG, path: linkPath(LANG, encode(P)), grade: null, score: null, headline: $("#vHead").textContent, stats, findings, facts };
   }
   // the report page sizes the frame to the content

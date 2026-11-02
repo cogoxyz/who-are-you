@@ -23,6 +23,11 @@ It then checks those readings against each other the way a site would to spot a 
   - automation (`navigator.webdriver`)
 
   Every check that gives you away has a **How to fix** tip (Clash fake-ip / TUN for DNS leaks, limiting WebRTC, matching the time zone…), and a link to the 1ms.dog tool that looks deeper when the host announces it (`<meta name="dns">`, `"egress"`, `"ipqs"`).
+- **Connection protocols**, under the checks: judged the same way but not counted, since they say how the connection is made, not who you are:
+  - HTTP/3: this site's `/cdn-cgi/trace` asked again a few times; one answer over QUIC means it works. When none comes, WebRTC's STUN (UDP) decides: no UDP at all means it's blocked or the proxy doesn't carry it, otherwise the browser just hasn't switched yet
+  - ECH: this site publishes its ECH keys in its DNS HTTPS record, so the trace's `sni=plaintext` means the browser didn't use them; the likeliest reason by browser (Safari lacks it, Firefox needs DNS over HTTPS, otherwise DNS gave no HTTPS record, as with a proxy's fake-ip)
+  - Post-quantum key exchange: a browser that offers it by default (Chromium 124, Firefox 132, Safari 26 on) ending up with a classical one points to something in between that makes its own TLS
+  - WARP and Gateway: shown, not judged
 - **The fingerprint ID card**, with your previous visit: kept in your browser only, it shows when you were last here and whether the fingerprint was the same, which is how a site that never set a cookie still recognizes you.
 - **Sharing.** 1ms.dog's shared share dialog (`public/assets/share/`, copied verbatim from 1ms-shell) with an image card drawn in the browser and a link, `/<lang>/r/<version>.<code>` (no folder for English; older `/r/<code>` links still open), that opens the same portrait in the viewer's language and previews with the result in its title and image (the Worker writes them; format and version: `src/share.mjs`). Neither carries your address or fingerprint; city and network only if you tick the box. Shortened when the host announces a shortener (`<meta name="shortener">`).
 - **Every sniffer**, grouped:

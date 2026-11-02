@@ -243,3 +243,7 @@ html[data-who-embed] .eyebrow, html[data-who-embed] .acts, html[data-who-embed] 
 html[data-who-embed] .hero { padding: 16px 16px 0; gap: 14px; }
 html[data-who-embed] .hero h1 { font-size: 22px; margin-bottom: 8px; }
 html[data-who-embed] .bar { margin: 0 -16px; padding: 10px 16px 12px; }
+
+/* the connection's protocols, under the checks */
+.proto { margin-top: 14px; }
+.proto[hidden] { display: none; }

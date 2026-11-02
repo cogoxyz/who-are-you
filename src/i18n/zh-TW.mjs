@@ -144,7 +144,7 @@ export default {
   og_r1: "有幾處會暴露我",
   og_r2: "好多地方會暴露我",
 
-  em_blocked: "檢測請求全部失敗，可能被廣告攔截擴充功能擋下了", go_check: "做一次完整體檢", go_asn: "ASN 查詢", go_ipv6: "IPv6 測試",
+  em_blocked: "檢測請求全部失敗，可能被廣告攔截擴充功能擋下了", h_proto: "連線協定", c_h3: "HTTP/3", c_ech: "ECH", c_pq: "後量子加密", c_warp: "WARP", c_h3_ok: "可用：UDP 443 能通", c_h3_wait: "這次沒用上；UDP 能通，瀏覽器可能還沒切換", c_h3_udp: "沒用上，UDP 也出不去：被防火牆擋了，或代理不轉發 UDP", c_h3_unk: "WebRTC 關了，判斷不了", c_ech_ok: "已開啟：網路上的旁觀者看不到你造訪的網站名稱", c_ech_dns: "未生效：DNS 沒回傳 HTTPS 記錄（常見於代理的 fake-ip）", c_ech_ff: "未生效：Firefox 要開 DNS over HTTPS 才用 ECH", c_ech_safari: "未生效：Safari 還不支援 ECH", c_pq_ok: "已啟用（{kex}）", c_pq_mitm: "{b} 本該用後量子，這次卻是 {kex}：中間可能有東西自己建了 TLS（公司代理、防毒軟體的 HTTPS 掃描）", c_pq_old: "沒用上（{kex}）：這個瀏覽器版本還不支援", c_warp_on: "經 Cloudflare WARP（{w}）", c_warp_gw: "經 Cloudflare Gateway", c_warp_off: "沒用", tip_h3: "讓代理轉發 UDP（Clash / Mihomo：TUN 模式，udp: true）\n防火牆放行 UDP 443\n確認瀏覽器沒關掉 QUIC", tip_ech: "瀏覽器開「安全 DNS」（DNS over HTTPS）\n代理：關掉 fake-ip，或讓它的 DNS 回傳 HTTPS 記錄\n用支援 ECH 的瀏覽器：Chrome、Edge、Firefox", tip_pq: "更新瀏覽器\n關掉防毒軟體的 HTTPS 掃描，或問問公司代理是否解密流量", tip_warp: "Cloudflare WARP：在 1.1.1.1 應用程式裡開關", go_check: "做一次完整體檢", go_asn: "ASN 查詢", go_ipv6: "IPv6 測試",
 
   docs: [
     ["這個頁面做什麼？", "它執行的嗅探器，任何網站在你打開的那一刻都能執行。然後把結果寫成一段話：你可能來自哪裡、現在在哪、用什麼、喜歡什麼。\n把滑鼠移到話裡的空格上，會顯示它來自哪些嗅探器。下面的清單列出每個嗅探器、讀取方式（右側那一欄的 API 或請求標頭）和讀到的內容。它們都不會跳出授權提示。"],

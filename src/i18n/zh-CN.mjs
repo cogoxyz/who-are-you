@@ -144,7 +144,7 @@ export default {
   og_r1: "有几处会暴露我",
   og_r2: "好多地方会暴露我",
 
-  em_blocked: "检测请求全部失败，可能被广告拦截扩展拦下了", go_check: "做一次完整体检", go_asn: "ASN 查询", go_ipv6: "IPv6 测试",
+  em_blocked: "检测请求全部失败，可能被广告拦截扩展拦下了", h_proto: "连接协议", c_h3: "HTTP/3", c_ech: "ECH", c_pq: "后量子加密", c_warp: "WARP", c_h3_ok: "可用：UDP 443 能通", c_h3_wait: "这次没用上；UDP 能通，浏览器可能还没切换", c_h3_udp: "没用上，UDP 也出不去：被防火墙挡了，或代理不转发 UDP", c_h3_unk: "WebRTC 关了，判断不了", c_ech_ok: "已开启：网络上的旁观者看不到你访问的网站名", c_ech_dns: "未生效：DNS 没返回 HTTPS 记录（常见于代理的 fake-ip）", c_ech_ff: "未生效：Firefox 要开 DNS over HTTPS 才用 ECH", c_ech_safari: "未生效：Safari 还不支持 ECH", c_pq_ok: "已启用（{kex}）", c_pq_mitm: "{b} 本该用后量子，这次却是 {kex}：中间可能有东西自己建了 TLS（公司代理、杀毒软件的 HTTPS 扫描）", c_pq_old: "没用上（{kex}）：这个浏览器版本还不支持", c_warp_on: "经 Cloudflare WARP（{w}）", c_warp_gw: "经 Cloudflare Gateway", c_warp_off: "没用", tip_h3: "让代理转发 UDP（Clash / Mihomo：TUN 模式，udp: true）\n防火墙放行 UDP 443\n确认浏览器没关掉 QUIC", tip_ech: "浏览器开「安全 DNS」（DNS over HTTPS）\n代理：关掉 fake-ip，或让它的 DNS 返回 HTTPS 记录\n用支持 ECH 的浏览器：Chrome、Edge、Firefox", tip_pq: "升级浏览器\n关掉杀毒软件的 HTTPS 扫描，或问问公司代理是否解密流量", tip_warp: "Cloudflare WARP：在 1.1.1.1 应用里开关", go_check: "做一次完整体检", go_asn: "ASN 查询", go_ipv6: "IPv6 测试",
 
   docs: [
     ["这个页面做什么？", "它运行的嗅探器，任何网站在你打开的那一刻都能运行。然后把结果写成一段话：你可能来自哪里、现在在哪、用什么、喜欢什么。\n把鼠标放在话里的空格上，会显示它来自哪些嗅探器。下面的列表列出每个嗅探器、读取方式（右侧那一列的 API 或请求头）和读到的内容。它们都不会弹出授权提示。"],

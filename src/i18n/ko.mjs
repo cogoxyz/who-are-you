@@ -144,7 +144,7 @@ export default {
   og_r1: "들통날 점이 몇 개",
   og_r2: "들통날 점이 많음",
 
-  em_blocked: "검사 요청이 모두 실패했습니다. 광고 차단 확장 프로그램이 막았을 수 있습니다", go_check: "전체 점검 실행", go_asn: "ASN 조회", go_ipv6: "IPv6 테스트",
+  em_blocked: "검사 요청이 모두 실패했습니다. 광고 차단 확장 프로그램이 막았을 수 있습니다", h_proto: "연결 프로토콜", c_h3: "HTTP/3", c_ech: "ECH", c_pq: "양자 내성 암호", c_warp: "WARP", c_h3_ok: "사용 가능: UDP 443이 통함", c_h3_wait: "이번엔 안 씀. UDP는 되니 브라우저가 아직 전환하지 않았을 수 있음", c_h3_udp: "안 쓰고 UDP도 나가지 못함: 방화벽 차단이거나 프록시가 UDP를 전달하지 않음", c_h3_unk: "WebRTC가 꺼져 있어 판단할 수 없음", c_ech_ok: "켜짐: 방문하는 사이트 이름이 네트워크에 보이지 않음", c_ech_dns: "꺼짐: DNS가 HTTPS 레코드를 주지 않음(프록시 fake-ip에서 흔함)", c_ech_ff: "꺼짐: Firefox는 DNS over HTTPS일 때만 ECH를 씀", c_ech_safari: "꺼짐: Safari는 아직 ECH를 지원하지 않음", c_pq_ok: "사용 중({kex})", c_pq_mitm: "{b}는 쓰는 게 정상인데 이번엔 {kex}: 중간에 자체 TLS를 맺는 무언가(회사 프록시, 백신의 HTTPS 검사)가 있을 수 있음", c_pq_old: "안 씀({kex}): 이 브라우저 버전은 아직 지원하지 않음", c_warp_on: "Cloudflare WARP 경유({w})", c_warp_gw: "Cloudflare Gateway 경유", c_warp_off: "안 씀", tip_h3: "프록시가 UDP를 전달하게 하기(Clash / Mihomo: TUN 모드, udp: true)\n방화벽에서 UDP 443 허용\n브라우저에서 QUIC이 꺼져 있지 않은지 확인", tip_ech: "브라우저에서 보안 DNS(DNS over HTTPS) 켜기\n프록시: fake-ip를 끄거나 DNS가 HTTPS 레코드를 돌려주게 하기\nECH를 지원하는 브라우저 사용: Chrome, Edge, Firefox", tip_pq: "브라우저 업데이트\n백신의 HTTPS 검사를 끄거나, 회사 프록시가 트래픽을 복호화하는지 확인", tip_warp: "Cloudflare WARP: 1.1.1.1 앱에서 켜고 끄기", go_check: "전체 점검 실행", go_asn: "ASN 조회", go_ipv6: "IPv6 테스트",
 
   docs: [
     ["이 페이지는 무엇을 하나요?", "어떤 사이트든 여는 순간 돌릴 수 있는 스니퍼를 돌리고, 그 결과로 보이는 당신을 한 문단으로 씁니다. 어디 출신 같은지, 지금 어디 있는지, 무엇을 쓰고 무엇을 좋아하는지.\n문단의 빈칸에 마우스를 올리면 어느 스니퍼에서 왔는지 보입니다. 아래 목록에는 스니퍼마다 읽는 방법(오른쪽 열의 API나 헤더)과 읽어 낸 값이 있습니다. 어느 것도 권한을 묻지 않습니다."],

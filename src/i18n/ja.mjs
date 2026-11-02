@@ -144,7 +144,7 @@ export default {
   og_r1: "いくつか、ばれる点あり",
   og_r2: "ばれる点がたくさん",
 
-  em_blocked: "検査のリクエストがすべて失敗しました。広告ブロッカーに止められている可能性があります", go_check: "フルチェックを実行", go_asn: "ASN 検索", go_ipv6: "IPv6 テスト",
+  em_blocked: "検査のリクエストがすべて失敗しました。広告ブロッカーに止められている可能性があります", h_proto: "接続プロトコル", c_h3: "HTTP/3", c_ech: "ECH", c_pq: "耐量子暗号", c_warp: "WARP", c_h3_ok: "使える：UDP 443 が通る", c_h3_wait: "今回は未使用。UDP は通るので、ブラウザがまだ切り替えていないだけかも", c_h3_udp: "未使用で、UDP も出られない：ファイアウォールで遮断か、プロキシが UDP を転送していない", c_h3_unk: "WebRTC がオフなので判定できない", c_ech_ok: "オン：見ているサイト名がネットワーク上で見えない", c_ech_dns: "オフ：DNS が HTTPS レコードを返していない（プロキシの fake-ip でよくある）", c_ech_ff: "オフ：Firefox は DNS over HTTPS のときだけ ECH を使う", c_ech_safari: "オフ：Safari はまだ ECH に非対応", c_pq_ok: "有効（{kex}）", c_pq_mitm: "{b} なら使うはずが今回は {kex}：間に独自の TLS を張るもの（社内プロキシ、ウイルス対策の HTTPS スキャン）があるかも", c_pq_old: "未使用（{kex}）：このブラウザのバージョンはまだ非対応", c_warp_on: "Cloudflare WARP 経由（{w}）", c_warp_gw: "Cloudflare Gateway 経由", c_warp_off: "未使用", tip_h3: "プロキシで UDP を転送する（Clash / Mihomo：TUN モード、udp: true）\nファイアウォールで UDP 443 を許可\nブラウザで QUIC が無効になっていないか確認", tip_ech: "ブラウザで「セキュア DNS」（DNS over HTTPS）をオン\nプロキシ：fake-ip をやめるか、DNS が HTTPS レコードを返すようにする\nECH 対応ブラウザを使う：Chrome、Edge、Firefox", tip_pq: "ブラウザを更新\nウイルス対策の HTTPS スキャンをオフにするか、社内プロキシが通信を復号していないか確認", tip_warp: "Cloudflare WARP：1.1.1.1 アプリで切り替え", go_check: "フルチェックを実行", go_asn: "ASN 検索", go_ipv6: "IPv6 テスト",
 
   docs: [
     ["このページは何をする？", "どのサイトでも、開いた瞬間に動かせるスニファーを動かし、それで分かる「あなた」を文章にします：どこの出身らしいか、今どこにいるか、何を使い、何が好きか。\n文章の空欄にカーソルを合わせると、どのスニファーから来たかが出ます。下の一覧には、各スニファーの読み方（右の列の API やヘッダー）と読み取った内容があります。どれも許可を求めるダイアログは出しません。"],
