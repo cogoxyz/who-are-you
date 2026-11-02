@@ -39,6 +39,9 @@ import { nationality, device, browser, gpuName, gpuOS, kbdLayout, isDataCenter, 
   })();
   if (EMBED) document.documentElement.setAttribute("data-who-embed", "");
   const post = m => { if (EMBED) window.parent.postMessage({ ms: "checkup", v: 1, tool: "who", ...m }, EMBED); };
+  // a run that can't report anything says so once, and then sends no result (the page itself still finishes)
+  let failed = false;
+  const fail = () => { if (!failed) { failed = true; post({ type: "error", text: t("em_blocked") }); } };
   // the icon that ends a link to another tool (the same as the build's EXT)
   const EXT = '<svg class="ext" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2.5h4.5V7M13.5 2.5 7.5 8.5M12 10v3.5H2.5V4H6"/></svg>';
   const IPQS = META("ipqs"), EGRESS = META("egress"), DNSTEST = META("dns"), ASN = META("asn"), IPV6 = META("ipv6");
@@ -870,11 +873,20 @@ import { nationality, device, browser, gpuName, gpuOS, kbdLayout, isDataCenter, 
     const glInfo = gpu();
     fonts();
     const rtc = webrtc().then(() => g === gen && judge(false));
+    // the page's own request, and the probes that ask other sites who you are
+    const srv = server(), probes = [guard("stack", stack), guard(EXITS.map(([id]) => id), exits), guard("dns", () => dnsResolver().catch(e => { R.dnsCC = null; throw e; }))];
+    // Embedded, a run with no answer from this site's server, or none from any other site (an ad blocker drops the
+    // probes all together, at once), has nothing to report: say so as soon as that's clear, not when the slowest
+    // sniffer gives up
+    if (EMBED) {
+      srv.then(() => { if (g === gen && !R.srv.ip) fail(); });
+      Promise.all(probes).then(() => { if (g === gen && !R.dnsCC && !(R.stack || []).length && !Object.values(R.ex || {}).some(Boolean)) fail(); });
+    }
     await Promise.all([
-      server(), guard("kbd", keyboard), guard("voices", voices), guard(["os", "browser", "arch", "screen", "cpu", "mem", "touch", "conn"], hardware),
+      srv, guard("kbd", keyboard), guard("voices", voices), guard(["os", "browser", "arch", "screen", "cpu", "mem", "touch", "conn"], hardware),
       guard("battery", battery), guard("media", media), guard("storage", storage), guard("adblock", adblock), guard("ext", extensions),
       guard(["canvas", "audio", "fontfp", "rand", "fpid"], () => prints(glInfo)),
-      guard("stack", stack), guard(EXITS.map(([id]) => id), exits), guard("dns", () => dnsResolver().catch(e => { R.dnsCC = null; throw e; })), guard(["kex", "warp"], trace),
+      ...probes, guard(["kex", "warp"], trace),
       guard("webgpu", webgpu), guard("hz", refresh), guard("screens", screens), guard("codecs", codecs), guard("drm", drm), guard("perms", perms),
     ]);
     if (g !== gen) return;
@@ -884,7 +896,7 @@ import { nationality, device, browser, gpuName, gpuOS, kbdLayout, isDataCenter, 
     for (const id of Object.keys(PR)) if (!done.has(id)) na(id);   // anything a sniffer couldn't reach
     judge(true);
     $("#rerun").disabled = false; $("#share").disabled = false;
-    if (EMBED) post(embedResult());
+    if (EMBED && !failed) post(embedResult());
   }
 
   // The result for the report page: the headline and checks as the page shows them, the link a share would give

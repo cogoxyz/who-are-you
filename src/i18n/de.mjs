@@ -144,7 +144,7 @@ export default {
   og_r1: "Ein paar Dinge verraten mich",
   og_r2: "Vieles verrät mich",
 
-  go_check: "Kompletten Check starten", go_asn: "ASN-Abfrage", go_ipv6: "IPv6-Test",
+  em_blocked: "Alle Prüfanfragen sind fehlgeschlagen; vielleicht blockiert sie ein Werbeblocker", go_check: "Kompletten Check starten", go_asn: "ASN-Abfrage", go_ipv6: "IPv6-Test",
 
   docs: [
     ["Was macht diese Seite?", "Sie lässt dieselben Schnüffler laufen, die jede Website laufen lassen kann, sobald Sie sie öffnen, und schreibt auf, wer Sie damit sind: woher Sie wahrscheinlich kommen, wo Sie gerade sind, was Sie nutzen und was Sie mögen.\nZeigen Sie auf eine Lücke im Text, um zu sehen, von welchen Schnüfflern sie stammt; die Liste darunter zeigt jeden Schnüffler, wie er liest (die API oder der Header in der rechten Spalte) und was er gelesen hat. Keiner zeigt eine Berechtigungsabfrage."],

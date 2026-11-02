@@ -144,7 +144,7 @@ export default {
   og_r1: "Algumas coisas me entregam",
   og_r2: "Muitas coisas me entregam",
 
-  go_check: "Fazer uma verificação completa", go_asn: "Consulta ASN", go_ipv6: "Teste de IPv6",
+  em_blocked: "Todas as solicitações de teste falharam; talvez um bloqueador de anúncios as esteja bloqueando", go_check: "Fazer uma verificação completa", go_asn: "Consulta ASN", go_ipv6: "Teste de IPv6",
 
   docs: [
     ["O que esta página faz?", "Ela roda os mesmos farejadores que qualquer site pode rodar assim que você o abre e escreve quem isso faz de você: de onde você provavelmente vem, onde está, o que usa e do que gosta.\nPasse o mouse sobre uma lacuna do parágrafo para ver de quais farejadores ela veio; a lista abaixo mostra cada farejador, como ele lê (a API ou o cabeçalho da coluna da direita) e o que leu. Nenhum mostra pedido de permissão."],

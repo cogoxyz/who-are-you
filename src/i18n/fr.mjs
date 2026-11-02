@@ -144,7 +144,7 @@ export default {
   og_r1: "Quelques points me trahissent",
   og_r2: "Beaucoup de points me trahissent",
 
-  go_check: "Lancer un bilan complet", go_asn: "Recherche ASN", go_ipv6: "Test IPv6",
+  em_blocked: "Toutes les requêtes de test ont échoué ; un bloqueur de publicité les bloque peut-être", go_check: "Lancer un bilan complet", go_asn: "Recherche ASN", go_ipv6: "Test IPv6",
 
   docs: [
     ["Que fait cette page ?", "Elle lance les mêmes renifleurs que n’importe quel site peut lancer dès que vous l’ouvrez, puis écrit qui cela fait de vous : d’où vous venez probablement, où vous êtes, ce que vous utilisez et ce que vous préférez.\nSurvolez un trou du paragraphe pour voir de quels renifleurs il vient ; la liste en dessous montre chaque renifleur, comment il lit (l’API ou l’en-tête de la colonne de droite) et ce qu’il a lu. Aucun n’affiche de demande d’autorisation."],
