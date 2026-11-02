@@ -518,18 +518,21 @@ import { nationality, device, browser, gpuName, gpuOS, kbdLayout, isDataCenter, 
     txt("warp", "WARP " + (v.warp || "–") + " · Gateway " + (v.gateway || "–"));
   }
 
-  // Whether this browser reaches the site over HTTP/3: the page's own request often comes over TCP (the browser
-  // learns from that first answer that the site speaks HTTP/3), so the trace is asked again a few times, a moment
-  // apart, until one comes over QUIC
+  // Whether this browser gets anywhere over HTTP/3. Requests to this site keep riding the connection the page came in
+  // on (usually TCP, the browser learns from that first answer that the site speaks HTTP/3), so the protocol every
+  // request of the page went over counts too (Resource Timing: Cloudflare Radar's probes allow it); the trace is
+  // asked again a few times, a moment apart, until either shows QUIC
+  const seenProtos = () => performance.getEntriesByType("navigation").concat(performance.getEntriesByType("resource")).map(e => e.nextHopProtocol).filter(Boolean);
   async function http3() {
     R.http = [];
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 4 && !seenProtos().includes("h3"); i++) {
       await new Promise(r => setTimeout(r, 700));
       const s = await getT("/cdn-cgi/trace").catch(() => "");
       const m = s.match(/^http=(.+)$/m);
       if (m) R.http.push(m[1].trim());
       if (m && /^http\/3$/i.test(m[1].trim())) break;
     }
+    R.http.push(...seenProtos());
   }
 
   async function webgpu() {
