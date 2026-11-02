@@ -1,7 +1,7 @@
 # Cloudflare Worker: static pages from ./public (served without running the script: free, unmetered) plus src/worker.js
 # for /api/me. No routes or custom domain here: on 1ms.dog the site routes the domain to this Worker. To self-host,
 # bind your own domain in the dashboard (see README).
-name = "who"
+name = "who-are-you"
 main = "src/worker.js"
 compatibility_date = "2025-10-01"
 workers_dev = false
